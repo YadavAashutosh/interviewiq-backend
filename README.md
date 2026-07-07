@@ -7,7 +7,7 @@
 > This repo contains the backend (API) source. The Flutter mobile app's
 > source isn't published here — this README documents what the full app
 > does end-to-end so the backend's purpose makes sense in context.
-> Note : First time using the App key will take 20-30 seconds, To start the render service. Be patient, Thank you.
+> Note : First time using the App key features will take 20-30 seconds, To start the render service. Be patient, Thank you.
 
 ---
 
