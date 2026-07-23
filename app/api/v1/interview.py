@@ -5,8 +5,10 @@ from app.models.interview_schemas import (
     InterviewQuestionResponse,
     InterviewAnswerRequest,
     InterviewAnswerResponse,
+    RefineAnswerRequest,
+    RefineAnswerResponse,
 )
-from app.services.interview_service import generate_question, evaluate_answer
+from app.services.interview_service import generate_question, evaluate_answer, refine_answer
 
 router = APIRouter(prefix="/api/v1/interview", tags=["interview"])
 
@@ -27,3 +29,14 @@ async def submit_answer(req: InterviewAnswerRequest):
         return InterviewAnswerResponse(**result)
     except Exception as e:
         raise HTTPException(500, f"Could not evaluate answer: {e}")
+
+
+@router.post("/refine-answer", response_model=RefineAnswerResponse)
+async def refine(req: RefineAnswerRequest):
+    if not req.raw_text.strip():
+        raise HTTPException(400, "Nothing to refine — the answer is empty.")
+    try:
+        refined = refine_answer(req.raw_text)
+        return RefineAnswerResponse(refined_text=refined)
+    except Exception as e:
+        raise HTTPException(500, f"Could not refine answer: {e}")

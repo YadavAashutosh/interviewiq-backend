@@ -3,9 +3,9 @@ from typing import List
 
 
 class InterviewQuestionRequest(BaseModel):
-    mode: str          # e.g. "Technical Round", "Behavioral Round", "HR Round"
-    persona: str        # e.g. "Google", "Startup Founder", "HR Manager"
-    job_role: str        # e.g. "Flutter Developer"
+    mode: str
+    persona: str
+    job_role: str
     previous_questions: List[str] = []
 
 
@@ -27,3 +27,11 @@ class InterviewAnswerResponse(BaseModel):
     strengths: List[str]
     improvements: List[str]
     next_question: str
+
+
+class RefineAnswerRequest(BaseModel):
+    raw_text: str
+
+
+class RefineAnswerResponse(BaseModel):
+    refined_text: str

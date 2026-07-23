@@ -47,3 +47,28 @@ exactly this shape, no markdown fences, no extra text:
         response_format={"type": "json_object"},
     )
     return json.loads(response.choices[0].message.content)
+
+
+def refine_answer(raw_text: str) -> str:
+    """Takes a raw typed/transcribed answer — possibly containing typos,
+    Hindi/Hinglish, or mixed-language phrasing — and rewrites it as a
+    clean, grammatically correct, professional English interview answer,
+    preserving the original meaning and every point the candidate made."""
+    prompt = f"""The following is a candidate's interview answer, typed or transcribed as-is.
+It may contain typos, be in Hindi, Hinglish, or a mix of languages.
+
+Rewrite it as a clean, grammatically correct, professional English answer that an interviewer
+would read. Preserve the original meaning and every point made — do not add new content, do not
+remove substance, just fix language, grammar, and clarity. If it's already clean English, make
+only minor polish.
+
+Return ONLY the rewritten answer text. No preamble, no quotes, no explanation.
+
+ORIGINAL ANSWER:
+{raw_text}"""
+
+    response = _client.chat.completions.create(
+        model=_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content.strip().strip('"')
