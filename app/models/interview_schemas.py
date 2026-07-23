@@ -6,6 +6,7 @@ class InterviewQuestionRequest(BaseModel):
     mode: str
     persona: str
     job_role: str
+    difficulty: str = "Medium"
     previous_questions: List[str] = []
 
 
@@ -17,6 +18,7 @@ class InterviewAnswerRequest(BaseModel):
     mode: str
     persona: str
     job_role: str
+    difficulty: str = "Medium"
     question: str
     answer: str
 
