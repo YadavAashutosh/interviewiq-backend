@@ -2,7 +2,7 @@
 
 **Your AI Career Coach** — a full-stack, AI-powered mobile platform for campus placement preparation: resume analysis, mock interviews, and aptitude practice, all in one app.
 
-📱 **Try the app (APK):** [Download from Google Drive](https://drive.google.com/file/d/1t69Sajt2D8PPKNFDbae_L9jADEnU9YNH/view?usp=sharing)
+📱 **Try the app (APK):** [Download from Google Drive](https://drive.google.com/drive/folders/126UYR0hsLgdvccnHpV46g_vpOmwms9as?usp=sharing)
 
 > This repo contains the backend (API) source. The Flutter mobile app's
 > source isn't published here — this README documents what the full app
