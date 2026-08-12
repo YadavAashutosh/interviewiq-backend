@@ -12,6 +12,14 @@ _DIFFICULTY_GUIDANCE = {
     "Hard": "A genuinely challenging, in-depth question that would test a strong, experienced candidate — can involve edge cases, trade-offs, or deeper reasoning.",
 }
 
+# Applied everywhere the LLM generates explanation text, so nothing ever
+# comes back as a giant wall of text or a huge code dump that would
+# overflow a mobile chat bubble.
+_BREVITY_RULE = """Keep every explanation SHORT and simple — like a spoken interview answer,
+not an essay. If code is truly necessary to explain something, use at most 4-5 short lines,
+no long blocks, no unnecessary comments — prefer a plain-English explanation over code whenever
+possible."""
+
 
 def generate_question(
     mode: str,
@@ -28,6 +36,8 @@ def generate_question(
 
 Difficulty level: {difficulty}. {difficulty_note}
 
+Keep the question itself concise — 1 to 3 sentences, no long setup or preamble.
+
 Do NOT repeat or closely rephrase any of these already-asked questions:
 {avoid}
 
@@ -40,7 +50,7 @@ Return ONLY the question text. No preamble, no numbering, no quotation marks."""
     return response.choices[0].message.content.strip().strip('"')
 
 
-def evaluate_answer(
+def check_answer(
     mode: str,
     persona: str,
     job_role: str,
@@ -48,22 +58,40 @@ def evaluate_answer(
     answer: str,
     difficulty: str = "Medium",
 ) -> dict:
+    """Evaluates the candidate's answer to the CURRENT question — same core
+    signal as before (score, honest feedback on what was right/wrong,
+    strengths, improvements) — and additionally prepares 3 short follow-up
+    'doubt' clarifications a beginner would likely still have after this
+    question, each with its own short answer. Does NOT generate the next
+    question — that's a separate, explicit action now."""
     difficulty_note = _DIFFICULTY_GUIDANCE.get(difficulty, _DIFFICULTY_GUIDANCE["Medium"])
 
     prompt = f"""You are an expert {persona}-style interviewer evaluating a candidate's answer
-in a {mode} for a {job_role} role. The candidate selected difficulty level: {difficulty}.
+in a {mode} for a {job_role} role. Difficulty level: {difficulty}. {difficulty_note}
 
-QUESTION: {question}
-CANDIDATE ANSWER: {answer}
+QUESTION ASKED: {question}
+CANDIDATE'S ANSWER: {answer}
 
-Evaluate the answer honestly (don't be overly generous) and respond with ONLY valid JSON in
-exactly this shape, no markdown fences, no extra text:
+Evaluate the answer honestly (don't be overly generous) — say clearly what the candidate got
+right and what they got wrong or missed.
+
+{_BREVITY_RULE}
+
+Also prepare exactly 3 short follow-up "doubt" clarifications — basic things a candidate at
+this level would likely still be confused about after this question (e.g. "what does X mean",
+"why does Y happen", "difference between A and B"). Each with a short, simple answer.
+
+Respond with ONLY valid JSON in exactly this shape, no markdown fences, no extra text:
 {{
   "score": <integer 0-100>,
-  "feedback": "<2-3 sentence overall feedback, direct and specific>",
-  "strengths": ["<short strength>", "<short strength>"],
-  "improvements": ["<short improvement>", "<short improvement>"],
-  "next_question": "<the next interview question for this {mode}, different from the question above, at {difficulty} difficulty: {difficulty_note}>"
+  "feedback": "<short overall feedback, under 40 words, direct and specific about what was right/wrong>",
+  "strengths": ["<short strength, under 12 words>", "<short strength, under 12 words>"],
+  "improvements": ["<short improvement, under 12 words>", "<short improvement, under 12 words>"],
+  "suggested_doubts": [
+    {{"question": "<short common doubt question>", "answer": "<short simple answer, under 40 words>"}},
+    {{"question": "<short common doubt question>", "answer": "<short simple answer, under 40 words>"}},
+    {{"question": "<short common doubt question>", "answer": "<short simple answer, under 40 words>"}}
+  ]
 }}"""
 
     response = _client.chat.completions.create(
@@ -72,6 +100,30 @@ exactly this shape, no markdown fences, no extra text:
         response_format={"type": "json_object"},
     )
     return json.loads(response.choices[0].message.content)
+
+
+def ask_doubt(mode: str, job_role: str, question: str, answer: str, doubt: str) -> str:
+    """Answers a candidate's own free-typed follow-up doubt about the
+    question/their answer/the feedback — like asking the interviewer to
+    clarify something in simple terms."""
+    prompt = f"""You are a friendly, patient technical mentor helping a candidate preparing for
+a {mode} interview for a {job_role} role understand something better.
+
+ORIGINAL INTERVIEW QUESTION: {question}
+CANDIDATE'S ANSWER: {answer}
+CANDIDATE'S FOLLOW-UP DOUBT: {doubt}
+
+{_BREVITY_RULE}
+
+Answer the doubt directly and simply, like explaining to a beginner, under 60 words.
+
+Return ONLY the answer text. No preamble."""
+
+    response = _client.chat.completions.create(
+        model=_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content.strip()
 
 
 def refine_answer(raw_text: str) -> str:

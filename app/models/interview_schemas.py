@@ -23,12 +23,33 @@ class InterviewAnswerRequest(BaseModel):
     answer: str
 
 
+class FollowUpDoubt(BaseModel):
+    question: str
+    answer: str
+
+
 class InterviewAnswerResponse(BaseModel):
+    # Same core evaluation as before — score, feedback, strengths,
+    # improvements are unchanged. next_question is REMOVED from this
+    # response: advancing to the next question is now a separate,
+    # explicit action (the "Next" button), not automatic.
     score: int
     feedback: str
     strengths: List[str]
     improvements: List[str]
-    next_question: str
+    suggested_doubts: List[FollowUpDoubt]
+
+
+class DoubtRequest(BaseModel):
+    mode: str
+    job_role: str
+    question: str
+    answer: str
+    doubt: str
+
+
+class DoubtResponse(BaseModel):
+    answer: str
 
 
 class RefineAnswerRequest(BaseModel):
