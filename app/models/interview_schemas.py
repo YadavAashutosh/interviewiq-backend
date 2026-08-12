@@ -25,19 +25,30 @@ class InterviewAnswerRequest(BaseModel):
 
 class FollowUpDoubt(BaseModel):
     question: str
-    answer: str
+    points: List[str]   # short bullet-point answer, not a paragraph
 
 
 class InterviewAnswerResponse(BaseModel):
-    # Same core evaluation as before — score, feedback, strengths,
-    # improvements are unchanged. next_question is REMOVED from this
-    # response: advancing to the next question is now a separate,
-    # explicit action (the "Next" button), not automatic.
+    # "Check Score" result — unchanged core evaluation: score, feedback
+    # (right/wrong), strengths, improvements — plus 3 suggested doubts.
+    # Does NOT include the ideal answer — that's a separate action now.
     score: int
     feedback: str
     strengths: List[str]
     improvements: List[str]
     suggested_doubts: List[FollowUpDoubt]
+
+
+class ModelAnswerRequest(BaseModel):
+    mode: str
+    persona: str
+    job_role: str
+    difficulty: str = "Medium"
+    question: str
+
+
+class ModelAnswerResponse(BaseModel):
+    points: List[str]   # the ideal/correct answer, as short bullet points
 
 
 class DoubtRequest(BaseModel):
@@ -49,7 +60,7 @@ class DoubtRequest(BaseModel):
 
 
 class DoubtResponse(BaseModel):
-    answer: str
+    points: List[str]   # short bullet-point answer, not a paragraph
 
 
 class RefineAnswerRequest(BaseModel):
