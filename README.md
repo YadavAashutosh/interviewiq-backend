@@ -4,10 +4,19 @@
 
 📱 **Try the app (APK):** [Download from Google Drive](https://drive.google.com/drive/folders/126UYR0hsLgdvccnHpV46g_vpOmwms9as?usp=sharing)
 
+> The folder above contains multiple APK versions — **install the latest
+> one** for the full feature set and the most bug fixes. Older versions
+> are kept there only for reference if you want to see how the app
+> evolved; they're not the recommended build to use.
+
+> **First-time note:** the backend runs on a free-tier server that sleeps
+> after inactivity. The very first AI action you try (resume scan,
+> interview question, quiz) may take 20-30 seconds to respond while it
+> wakes up — this is normal, not a bug. Every action after that is fast.
+
 > This repo contains the backend (API) source. The Flutter mobile app's
 > source isn't published here — this README documents what the full app
 > does end-to-end so the backend's purpose makes sense in context.
-> Note : First time using the App key features will take 20-30 seconds, To start the render service. Be patient, Thank you.
 
 ---
 
@@ -16,7 +25,12 @@
 InterviewIQ AI is a mobile app (Flutter, Android) with a Python backend, built to help students prepare for campus placements end-to-end.
 
 ### 🏠 Home Dashboard
-Real-time overview of your prep progress: current Resume Score, Interview Readiness, Communication Score, daily streak, today's practice goal, and a merged recent-activity feed (interviews, quizzes, resume scans) — all computed live from your actual usage, not placeholder data.
+Real-time overview of your prep progress: current Resume Score, Interview Readiness, Communication Score, daily streak, today's practice goal, and a merged recent-activity feed — all computed live from your actual usage, not placeholder data.
+
+> **Example:** open the app after doing a mock interview and a resume
+> scan earlier in the day — Home shows your updated Resume Score,
+> today's streak count, and a feed like "Technical Round — Scored 78%"
+> and "Resume re-scanned — ATS score: 82%", both time-stamped.
 
 ### 📄 Resume Analyzer / ATS Checker
 Upload a PDF resume and paste a target job description. The backend:
@@ -25,28 +39,61 @@ Upload a PDF resume and paste a target job description. The backend:
 - Computes an ATS match score — a weighted blend of keyword-match ratio and TF-IDF/cosine text similarity
 - Runs Named Entity Recognition to pull out organizations, dates, and locations from the resume
 - Calls an LLM (Groq/Llama 3.3) to generate specific, actionable improvement suggestions
-Results (score + skill gaps + suggestions) are shown in the app and saved to the user's profile.
+
+> **Example:** upload your resume and paste a "Flutter Developer" job
+> posting. You get back something like: **ATS Score: 74%**, matched
+> skills `Flutter, Firebase, Git`, missing skills `REST API, CI/CD`, and
+> a suggestion like *"Add a project bullet demonstrating REST API
+> integration."* Results are saved to your profile automatically.
 
 ### 🎤 AI Mock Interviews
-Pick an interviewer **persona** (Google, Microsoft, Amazon, Startup Founder, HR Manager) and a **round type** (Technical, Behavioral, HR, Resume-based, Project-based, or a general Chat interview). The app then runs a real back-and-forth interview:
-1. Backend generates a question tailored to the mode/persona/role
-2. You answer (typed or spoken)
-3. Backend evaluates the answer — returns a score, feedback, strengths, improvements, and a natural follow-up question
-4. Repeats for as long as you want to practice
+Pick an interviewer **persona** (Google, Microsoft, Amazon, Startup Founder, HR Manager), a **round type** (Technical, Behavioral, HR, Resume-based, Project-based, or general Chat), and a **difficulty** (Easy/Medium/Hard). The app runs a real interview loop:
+
+1. Backend generates a question tailored to the mode/persona/role/difficulty
+2. You answer (typed or spoken) and tap **Check Score** — get an honest score, what you got right, what you missed
+3. Tap **Check Answer** any time to reveal the ideal/model answer as short bullet points
+4. Tap a suggested doubt chip, or type your own follow-up doubt, for a quick clarifying explanation
+5. Tap **Retry** to redo the same question, or **Next Question** to move on — your call
+
+> **Example:** choose *Google* persona, *Technical Round*, *Medium*
+> difficulty for a "Backend Developer" role. You get asked "Explain the
+> difference between SQL and NoSQL databases." You answer, tap **Check
+> Score** → 65%, feedback on what was missed. You tap **Check Answer** →
+> see the ideal 4-bullet-point answer. You tap the doubt chip *"What does
+> ACID mean?"* → get a 2-line explanation, then hit **Next Question**.
 
 **Voice Interview mode** additionally speaks the question aloud (text-to-speech) and transcribes your spoken answer live (speech-to-text) using the phone's microphone — a fully hands-free mock interview.
 
 ### 🧮 Aptitude & Coding Quiz
-AI-generated multiple-choice quizzes across four categories — Quantitative Aptitude, Logical Reasoning, Verbal Ability, and Coding/Technical — at a chosen difficulty and question count. Each question includes an explanation shown immediately after you answer, and a final score summary.
+AI-generated multiple-choice quizzes across four categories — Quantitative Aptitude, Logical Reasoning, Verbal Ability, and Coding/Technical — at a chosen difficulty and question count.
+
+> **Example:** pick *Logical Reasoning*, *Hard*, *10 questions*. Each
+> question shows 4 options; pick one and get instant right/wrong
+> highlighting plus a short explanation before moving to the next. At the
+> end you get a score like **7/10** saved to your history.
 
 ### 📈 Progress
 A weekly score-trend chart (Mon–Sun, averaged across interview + quiz sessions that week), gamified XP/Level/Coins computed from real session history, and weekly/monthly activity summaries.
 
+> **Example:** after a week of practicing, Progress shows a line chart
+> dipping on days you skipped and rising on days you did 2-3 sessions,
+> along with something like **Level 3 · 640 XP · 64 Coins** and "5
+> sessions this week."
+
 ### 👤 Profile
 Editable college, branch, graduation year, skills, and social links (GitHub/LinkedIn/Portfolio), saved per account. Shows your latest resume ATS score at a glance.
 
+> **Example:** tap the edit icon, add skills like `Python`, `Flutter`,
+> `SQL` as chips, paste your GitHub/LinkedIn URLs, hit Save — it's there
+> next time you log in, on any device.
+
 ### 🔐 Authentication
 Email/Password, Google Sign-In, or Guest mode (full functionality without an account — progress just isn't saved permanently). Backed by Firebase Authentication + Firestore for persistence.
+
+> **Example:** open the app for the first time and it drops you straight
+> into Home as a guest — try everything immediately. A small banner
+> ("browsing as guest") lets you log in with Google anytime to start
+> saving your progress permanently.
 
 ---
 
@@ -71,7 +118,7 @@ The app never calls the LLM directly — every AI operation is proxied through t
 
 ## This repo: Backend
 
-FastAPI service combining classic NLP with an LLM to power the three AI-driven modules above.
+FastAPI service combining classic NLP with an LLM to power the AI-driven modules above.
 
 ### Tech Stack
 
@@ -81,7 +128,7 @@ FastAPI service combining classic NLP with an LLM to power the three AI-driven m
 | NLP | spaCy (`en_core_web_sm`) — skill extraction, named entity recognition |
 | ATS scoring | scikit-learn — TF-IDF + cosine similarity, blended with keyword-match ratio |
 | PDF parsing | pdfplumber |
-| LLM | Groq API — Llama 3.3 70B (question generation, answer evaluation, resume suggestions, quiz generation) |
+| LLM | Groq API — Llama 3.3 70B (question generation, answer evaluation, model answers, doubts, resume suggestions, quiz generation) |
 | Config | pydantic-settings (`.env`-based) |
 | Hosting | Render (free tier, auto-deploy from `main`) |
 
@@ -91,8 +138,11 @@ FastAPI service combining classic NLP with an LLM to power the three AI-driven m
 |---|---|---|
 | GET | `/` | Health check |
 | POST | `/api/v1/resume/analyze` | Upload PDF + job description → ATS score, skill match, AI suggestions |
-| POST | `/api/v1/interview/question` | Generate an interview question (mode, persona, job role) |
-| POST | `/api/v1/interview/answer` | Evaluate an answer → score, feedback, next question |
+| POST | `/api/v1/interview/question` | Generate an interview question (mode, persona, role, difficulty) |
+| POST | `/api/v1/interview/answer` | Check the candidate's score → score, feedback, strengths, improvements, suggested doubts |
+| POST | `/api/v1/interview/model-answer` | Reveal the ideal/correct answer to a question |
+| POST | `/api/v1/interview/doubt` | Answer a candidate's own follow-up doubt |
+| POST | `/api/v1/interview/refine-answer` | Clean up typos/Hinglish into proper English before submitting |
 | POST | `/api/v1/quiz/generate` | Generate MCQ quiz questions (category, difficulty, count) |
 
 ### Project Structure
@@ -110,7 +160,7 @@ app/
 │   ├── resume_parser.py       # spaCy skill extraction + NER
 │   ├── ats_scorer.py          # TF-IDF/cosine + keyword-match ATS scoring
 │   ├── gemini_service.py      # Groq LLM — resume suggestions
-│   ├── interview_service.py   # Groq LLM — question generation + answer evaluation
+│   ├── interview_service.py   # Groq LLM — questions, scoring, model answers, doubts
 │   └── quiz_service.py        # Groq LLM — quiz generation
 └── api/v1/                    # Route handlers
     ├── resume.py
